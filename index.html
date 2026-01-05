@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Gymkhana Secreta 🎁</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #ffdde1, #ee9ca7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+button {
+    margin-top: 15px;
+    padding: 12px;
+    width: 100%;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+input {
+    padding: 10px;
+    width: 100%;
+    margin-top: 10px;
+}
+.hidden {
+    display: none;
+}
+.small {
+    font-size: 14px;
+    opacity: 0.8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<!-- PASO 1 -->
+<div id="step1">
+    <h2>🎉 Bienvenida a tu Gymkhana</h2>
+    <p>Si estás aquí es porque has escaneado el QR correcto 😏</p>
+    <button onclick="next(2)">Empezar</button>
+</div>
+
+<!-- PASO 2 -->
+<div id="step2" class="hidden">
+    <h2>🧠 Prueba 1</h2>
+    <p>¿Quién es la mejor hermana del mundo?</p>
+    <input id="q1" placeholder="Escribe tu respuesta...">
+    <button onclick="check1()">Responder</button>
+</div>
+
+<!-- PASO 3 -->
+<div id="step3" class="hidden">
+    <h2>🙃 Prueba 2</h2>
+    <p>No pulses el botón durante <b>5 segundos</b></p>
+    <p id="count">5</p>
+    <button id="btnFail" onclick="fail()">No tocar</button>
+</div>
+
+<!-- PASO 4 -->
+<div id="step4" class="hidden">
+    <h2>😂 Prueba 3</h2>
+    <p>Promete en voz alta que invitarás a un café ☕</p>
+    <button onclick="next(5)">Lo prometo</button>
+    <p class="small">(Sí, esto cuenta como contrato)</p>
+</div>
+
+<!-- PASO 5 -->
+<div id="step5" class="hidden">
+    <h2>😈 Prueba 4</h2>
+    <p>Este botón se mueve porque sabe cosas…</p>
+    <button id="moveBtn" onmouseover="move()">Atrápame</button>
+    <button onclick="next(6)">Ya vale, siguiente</button>
+</div>
+
+<!-- FINAL -->
+<div id="step6" class="hidden">
+    <h2>🎁 PREMIO FINAL</h2>
+    <p>Has superado la gymkhana ❤️</p>
+    <button onclick="goPrize()">Abrir regalo</button>
+    <p class="small">Hecho con amor (y un poco de maldad)</p>
+</div>
+
+</div>
+
+<script>
+function next(n) {
+    document.querySelectorAll('[id^="step"]').forEach(s => s.classList.add("hidden"));
+    document.getElementById("step" + n).classList.remove("hidden");
+}
+
+/* Prueba 1 */
+function check1() {
+    const v = document.getElementById("q1").value.toLowerCase();
+    if (v.includes("yo")) next(3);
+    else alert("Pista: empieza por YO 😌");
+}
+
+/* Prueba 2 */
+let time = 5;
+const timer = setInterval(() => {
+    if (document.getElementById("step3").classList.contains("hidden")) return;
+    time--;
+    document.getElementById("count").innerText = time;
+    if (time === 0) {
+        clearInterval(timer);
+        next(4);
+    }
+}, 1000);
+
+function fail() {
+    alert("❌ Demasiado pronto… vuelve a intentarlo");
+}
+
+/* Prueba 4 */
+function move() {
+    const btn = document.getElementById("moveBtn");
+    btn.style.position = "relative";
+    btn.style.left = Math.random() * 100 + "px";
+}
+
+/* Premio */
+function goPrize() {
+    window.location.href = "PEGA_AQUI_TU_LINK_PREMIO";
+}
+</script>
+
+</body>
+</html>
