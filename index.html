@@ -2,144 +2,516 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Gymkhana Secreta 🎁</title>
+<title>Gymkhana 💝</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 
 <style>
 body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #ffdde1, #ee9ca7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     margin: 0;
+    font-family: system-ui, -apple-system, Arial;
+    background: #fff0f5;
 }
+
+.container {
+    max-width: 420px;
+    margin: auto;
+    padding: 24px 20px 40px;
+}
+
 .card {
     background: white;
-    padding: 25px;
-    border-radius: 20px;
-    width: 100%;
-    max-width: 360px;
-    text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    border-radius: 22px;
+    padding: 28px 22px;
+    margin-top: 30px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
 }
-button {
-    margin-top: 15px;
-    padding: 12px;
-    width: 100%;
-    font-size: 16px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
+
+h2 {
+    margin-top: 0;
 }
+
+p {
+    line-height: 1.5;
+}
+
 input {
-    padding: 10px;
     width: 100%;
-    margin-top: 10px;
+    padding: 14px;
+    margin-top: 16px;
+    font-size: 16px;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
 }
+
+button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 20px;
+    font-size: 16px;
+    border-radius: 14px;
+    border: none;
+    background: #ff6f91;
+    color: white;
+}
+
+button.secondary {
+    background: #ddd;
+    color: #333;
+}
+
 .hidden {
     display: none;
 }
-.small {
+
+.center {
+    text-align: center;
+}
+
+.links {
+    position: relative;
+    height: 520px;
+    margin-top: 20px;
+}
+
+.links a {
+    position: absolute;
     font-size: 14px;
-    opacity: 0.8;
+    text-decoration: none;
+    color: white;
+    background: #ff6f91;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0;
+    font-weight: bold;
+    transition: transform 0.2s;
+}
+
+.links a:hover {
+    transform: scale(1.1);
+}
+
+@media (max-width: 480px) {
+    .container {
+        max-width: 100%;
+        padding: 16px 16px 40px;
+    }
+    
+    .card {
+        padding: 24px 18px;
+        margin-top: 20px;
+        border-radius: 18px;
+    }
+    
+    input {
+        padding: 12px;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+    
+    button {
+        padding: 12px;
+        font-size: 14px;
+    }
 }
 </style>
 </head>
 
 <body>
+<div class="container">
 
-<div class="card">
-
-<!-- PASO 1 -->
-<div id="step1">
-    <h2>🎉 Bienvenida a tu Gymkhana</h2>
-    <p>Si estás aquí es porque has escaneado el QR correcto 😏</p>
-    <button onclick="next(2)">Empezar</button>
+<!-- INTRO -->
+<div class="card" id="step1">
+    <h2>🎉 Bienvenida</h2>
+    <p>Has escaneado el QR correcto.<br>Empieza tu gymkhana 😏</p>
+    <button onclick="go(2)">Empezar</button>
 </div>
 
-<!-- PASO 2 -->
-<div id="step2" class="hidden">
+<!-- PRUEBA 1 -->
+<div class="card hidden" id="step2">
     <h2>🧠 Prueba 1</h2>
-    <p>¿Quién es la mejor hermana del mundo?</p>
-    <input id="q1" placeholder="Escribe tu respuesta...">
-    <button onclick="check1()">Responder</button>
+    <p>¿Quién es el mejor hermano del mundo?</p>
+    <input id="hermano" placeholder="Escribe el nombre">
+    <button onclick="checkHermano()">Responder</button>
 </div>
 
-<!-- PASO 3 -->
-<div id="step3" class="hidden">
-    <h2>🙃 Prueba 2</h2>
-    <p>No pulses el botón durante <b>5 segundos</b></p>
-    <p id="count">5</p>
-    <button id="btnFail" onclick="fail()">No tocar</button>
+<!-- PRUEBA 2 -->
+<div class="card hidden" id="step3">
+    <h2>🎵 Prueba 2</h2>
+    <p><b>Sube el volumen 🔊</b><br>
+    Tienes 5 segundos para adivinar la canción.</p>
+    <p id="countdown" class="center" style="font-size:22px">5</p>
+    <button id="playBtn" onclick="toggleSong()" style="background: #4CAF50;">▶ Play</button>
+    <input id="song" placeholder="Nombre de la canción">
+    <button onclick="checkSong()">Responder</button>
 </div>
 
-<!-- PASO 4 -->
-<div id="step4" class="hidden">
-    <h2>😂 Prueba 3</h2>
-    <p>Promete en voz alta que invitarás a un café ☕</p>
-    <button onclick="next(5)">Lo prometo</button>
-    <p class="small">(Sí, esto cuenta como contrato)</p>
+<!-- PRUEBA 3 -->
+<div class="card hidden" id="step4">
+    <h2>🐤 Prueba 3</h2>
+    <p>Mini Flappy Bird<br>Consigue <b>5 puntos</b></p>
+    <div style="position: relative; display: block; width: 320px; margin: 0 auto;">
+        <canvas id="game" width="320" height="420" style="display: block; margin: 0 auto; background: #e8f4f8; position: relative; z-index: 1;"></canvas>
+        <div id="scoreOverlay" style="position: absolute; top: 10px; right: 10px; background: #ff6f91; color: white; padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 18px; z-index: 5;">0</div>
+        <div id="countdownOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; z-index: 10; display: flex; align-items: center; justify-content: center;">
+            <p style="font-size: 80px; font-weight: bold; color: rgba(255, 111, 145, 0.9); margin: 0; text-shadow: 0 0 20px rgba(255, 111, 145, 0.5);">3</p>
+        </div>
+        <div id="playButtonOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; z-index: 10; align-items: center; justify-content: center;">
+            <button id="playButtonCircle" onclick="startGame()" style="width: 100px; height: 100px; border-radius: 50%; background: #4CAF50; border: none; color: white; font-size: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">▶</button>
+        </div>
+    </div>
+    <p class="center" id="instructions">Toca la pantalla para saltar</p>
 </div>
 
-<!-- PASO 5 -->
-<div id="step5" class="hidden">
-    <h2>😈 Prueba 4</h2>
-    <p>Este botón se mueve porque sabe cosas…</p>
-    <button id="moveBtn" onmouseover="move()">Atrápame</button>
-    <button onclick="next(6)">Ya vale, siguiente</button>
+<!-- PRUEBA 4 -->
+<div class="card hidden" id="step5">
+    <h2>🍬 Prueba 4</h2>
+    <p>Tráele a tu hermano su chuche favorita</p>
+    <button onclick="go(6)">Hecho</button>
 </div>
 
-<!-- FINAL -->
-<div id="step6" class="hidden">
-    <h2>🎁 PREMIO FINAL</h2>
-    <p>Has superado la gymkhana ❤️</p>
-    <button onclick="goPrize()">Abrir regalo</button>
-    <p class="small">Hecho con amor (y un poco de maldad)</p>
+<!-- PRUEBA 5 -->
+<div class="card hidden" id="step6">
+    <h2>🔗 Prueba final</h2>
+    <p>Solo uno de estos links es el bueno…</p>
+    <div class="links" id="links"></div>
+</div>
+
+<!-- VICTORIA -->
+<div class="card hidden" id="step7">
+    <h2>🎉 ¡GANASTE! 🎉</h2>
+    <p style="font-size: 24px; text-align: center;">¡Felicidades! Tienes al mejor hermano del mundo❤️</p>
+    <div style="text-align: center; margin-top: 30px;">
+        <img id="premioImg" src="premio.png" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+    </div>
+    <button onclick="location.reload()">Volver a empezar</button>
 </div>
 
 </div>
+
+<audio id="audio" src="volver.mp3"></audio>
 
 <script>
-function next(n) {
+function go(n) {
     document.querySelectorAll('[id^="step"]').forEach(s => s.classList.add("hidden"));
-    document.getElementById("step" + n).classList.remove("hidden");
+    document.getElementById("step"+n).classList.remove("hidden");
 }
 
-/* Prueba 1 */
-function check1() {
-    const v = document.getElementById("q1").value.toLowerCase();
-    if (v.includes("yo")) next(3);
-    else alert("Pista: empieza por YO 😌");
+/* PRUEBA 1 */
+function checkHermano() {
+    const v = document.getElementById("hermano").value.trim().toLowerCase();
+    if (v === "daniel") go(3);
+    else alert("❌ Pista: empieza por D 😉");
 }
 
-/* Prueba 2 */
-let time = 5;
-const timer = setInterval(() => {
-    if (document.getElementById("step3").classList.contains("hidden")) return;
-    time--;
-    document.getElementById("count").innerText = time;
-    if (time === 0) {
+/* PRUEBA 2 */
+let timer;
+let isPlaying = false;
+let countdownTime = 5;
+
+function toggleSong() {
+    const audio = document.getElementById("audio");
+    const btn = document.getElementById("playBtn");
+    
+    if (!isPlaying) {
+        isPlaying = true;
+        countdownTime = 5;
+        document.getElementById("countdown").innerText = countdownTime;
+        audio.currentTime = 0;
+        audio.play();
+        btn.innerText = "⏸ Pause";
+        btn.style.background = "#ff6f91";
+        
+        timer = setInterval(() => {
+            countdownTime--;
+            document.getElementById("countdown").innerText = countdownTime;
+            if (countdownTime === 0) {
+                clearInterval(timer);
+                audio.pause();
+                isPlaying = false;
+                btn.innerText = "▶ Play";
+                btn.style.background = "#4CAF50";
+            }
+        }, 1000);
+    } else {
+        isPlaying = false;
+        audio.pause();
+        btn.innerText = "▶ Play";
+        btn.style.background = "#4CAF50";
         clearInterval(timer);
-        next(4);
     }
-}, 1000);
-
-function fail() {
-    alert("❌ Demasiado pronto… vuelve a intentarlo");
 }
 
-/* Prueba 4 */
-function move() {
-    const btn = document.getElementById("moveBtn");
-    btn.style.position = "relative";
-    btn.style.left = Math.random() * 100 + "px";
+function checkSong() {
+    const v = document.getElementById("song").value.trim().toLowerCase();
+    if (v === "volver") go(4);
+    else alert("❌ No era esa…");
 }
 
-/* Premio */
-function goPrize() {
-    window.location.href = "PEGA_AQUI_TU_LINK_PREMIO";
+/* PRUEBA 3 – MINI FLAPPY */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+let birdY = 200, velocity = 0, pipes = [], score = 0, playing = false, gameActive = false;
+
+// Cargar imagen del jugador
+const playerImg = new Image();
+playerImg.src = "player.png";
+
+function jump() {
+    if (gameActive) {
+        velocity = -6;
+    }
+}
+
+canvas.addEventListener("click", jump);
+canvas.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    jump();
+});
+
+function startGame() {
+    // Reiniciar valores al principio
+    gameActive = false;
+    playing = false;
+    score = 0;
+    birdY = 200;
+    velocity = 0;
+    pipes = [];
+    
+    document.getElementById("scoreOverlay").innerText = "0";
+    document.getElementById("playButtonOverlay").style.display = "none";
+    
+    // Mostrar contador 3,2,1
+    const overlay = document.getElementById("countdownOverlay");
+    overlay.style.display = "flex";
+    let count = 3;
+    const countText = overlay.querySelector("p");
+    countText.innerText = count;
+    
+    const countInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+            countText.innerText = count;
+        } else {
+            overlay.style.display = "none";
+            clearInterval(countInterval);
+            // Iniciar juego después del countdown
+            gameActive = true;
+            playing = true;
+        }
+    }, 1000);
+}
+
+function resetGame() {
+    gameActive = false;
+    playing = false;
+    pipes = [];
+    birdY = 200;
+    velocity = 0;
+    score = 0;
+    document.getElementById("scoreOverlay").innerText = "0";
+    document.getElementById("countdownOverlay").style.display = "none";
+    document.getElementById("playButtonOverlay").style.display = "flex";
+}
+
+function gameLoop() {
+    ctx.clearRect(0, 0, 320, 420);
+    
+    if (!playing) {
+        // Dibujar jugador en reposo si el juego no está activo
+        if (playerImg.complete) {
+            ctx.drawImage(playerImg, 40, birdY, 60, 60);
+        }
+        requestAnimationFrame(gameLoop);
+        return;
+    }
+    
+    velocity += 0.4;
+    birdY += velocity;
+
+    // Verificar colisión con bordes
+    if (birdY < 0 || birdY > 360) {
+        resetGame();
+        requestAnimationFrame(gameLoop);
+        return;
+    }
+
+    if (playerImg.complete) {
+        ctx.drawImage(playerImg, 40, birdY, 60, 60);
+    }
+
+    if (pipes.length === 0 || pipes[pipes.length-1].x < 200) {
+        pipes.push({ x: 320, gap: 120 + Math.random()*100 });
+    }
+
+    let collisionDetected = false;
+    pipes.forEach(p => {
+        p.x -= 2;
+        ctx.fillStyle = "#ccc";
+        ctx.fillRect(p.x, 0, 40, p.gap - 80);
+        ctx.fillRect(p.x, p.gap + 80, 40, 420);
+
+        // Detectar colisión con las tuberías
+        if (p.x < 100 && p.x + 40 > 40) {
+            if (birdY < p.gap - 80 || birdY + 60 > p.gap + 80) {
+                collisionDetected = true;
+            }
+        }
+
+        if (p.x === 60) {
+            score++;
+            document.getElementById("scoreOverlay").innerText = score;
+        }
+    });
+
+    if (collisionDetected) {
+        resetGame();
+        requestAnimationFrame(gameLoop);
+        return;
+    }
+
+    if (score >= 5) {
+        go(5);
+        return;
+    }
+
+    requestAnimationFrame(gameLoop);
+}
+gameLoop();
+
+/* PRUEBA 5 */
+const fakeLinks = [
+    "https://wikipedia.org",
+    "https://youtube.com",
+    "https://google.com",
+    "https://elpais.com",
+    "https://rtve.es"
+];
+
+const linkTexts = [
+    "aqui",
+    "link",
+    "premio",
+    "aqui si",
+    "aqui no",
+    "este",
+    "porfi yo",
+    "daniel es el mejor",
+    "inutil este no",
+    "mayonesa",
+    "me aburro",
+    "alpargata",
+    "vida",
+    "sudadera zara",
+    "500000€"
+];
+
+const linksDiv = document.getElementById("links");
+const winner = Math.floor(Math.random() * 15);
+const circles = []; // Array para almacenar posiciones y tamaños de las bolitas
+
+function canPlaceCircle(x, y, radius, existingCircles) {
+    for (let circle of existingCircles) {
+        const distance = Math.sqrt(Math.pow(x - circle.x, 2) + Math.pow(y - circle.y, 2));
+        if (distance < circle.radius + radius + 10) { // Reducido de 15px a 10px
+            return false;
+        }
+    }
+    return true;
+}
+
+function getRandomPosition(size) {
+    const radius = size / 2;
+    const maxAttempts = 100; // Aumentado de 50 a 100
+    
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const x = radius + Math.random() * (300 - size);
+        const y = radius + Math.random() * (520 - size);
+        
+        if (canPlaceCircle(x, y, radius, circles)) {
+            return { x, y };
+        }
+    }
+    
+    return null;
+}
+
+for (let i=0;i<15;i++) {
+    const a = document.createElement("a");
+    const size = 40 + Math.random() * 60; // Tamaños entre 40px y 100px
+    const radius = size / 2;
+    
+    let pos = getRandomPosition(size);
+    
+    // Si no encuentra espacio en los intentos normales, reducir tamaño y reintentar
+    if (pos === null) {
+        const smallerSize = 35 + Math.random() * 40;
+        const smallerRadius = smallerSize / 2;
+        pos = getRandomPosition(smallerSize);
+    }
+    
+    if (pos === null) {
+        // Si sigue sin encontrar espacio, colocar en posición forzada
+        pos = { x: 50 + (i * 30), y: 50 + ((i % 5) * 100) };
+    }
+    
+    circles.push({ x: pos.x, y: pos.y, radius: radius });
+    
+    // El link ganador es el que tiene "este"
+    if (i === winner) {
+        a.innerText = "este";
+        a.href = "#";
+        a.onclick = (e) => {
+            e.preventDefault();
+            // Animación de confeti
+            confetti({
+                particleCount: 150,
+                spread: 100,
+                origin: { y: 0.6 }
+            });
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.3 }
+            });
+            // Ir a pantalla de victoria
+            setTimeout(() => {
+                go(7);
+                // Confeti continuo en la pantalla de victoria
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        confetti({
+                            particleCount: 50,
+                            spread: 360,
+                            origin: { x: Math.random(), y: Math.random() * 0.5 }
+                        });
+                    }, i * 300);
+                }
+            }, 500);
+        };
+    } else {
+        // Seleccionar una palabra aleatoria que no sea "este"
+        let randomText;
+        do {
+            randomText = linkTexts[Math.floor(Math.random() * linkTexts.length)];
+        } while (randomText === "este");
+        
+        a.innerText = randomText;
+        a.href = fakeLinks[Math.floor(Math.random()*fakeLinks.length)];
+    }
+    
+    a.style.width = size + "px";
+    a.style.height = size + "px";
+    a.style.fontSize = Math.max(8, size / 5) + "px";
+    a.style.top = (pos.y - radius) + "px";
+    a.style.left = (pos.x - radius) + "px";
+    a.target = "_blank";
+    linksDiv.appendChild(a);
 }
 </script>
 
