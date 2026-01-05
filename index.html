@@ -96,16 +96,69 @@ button.secondary {
     transform: scale(1.1);
 }
 
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    max-width: 70vw;
+    width: 100%;
+    max-height: 70vh;
+    text-align: center;
+    position: relative;
+    animation: shake 0.5s;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    overflow-y: auto;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+.modal-content img {
+    width: 100%;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.modal-content h3 {
+    color: #ff6f91;
+    margin: 10px 0;
+}
+
+.modal-content button {
+    margin-top: 15px;
+    width: 100%;
+}
+
 @media (max-width: 480px) {
     .container {
         max-width: 100%;
-        padding: 16px 16px 40px;
+        padding: 16px 12px 40px;
     }
     
     .card {
-        padding: 24px 18px;
-        margin-top: 20px;
-        border-radius: 18px;
+        padding: 20px 16px;
+        margin-top: 16px;
+        border-radius: 16px;
     }
     
     input {
@@ -118,6 +171,21 @@ button.secondary {
         padding: 12px;
         font-size: 14px;
     }
+    
+    .links {
+        height: 360px;
+        margin-top: 16px;
+    }
+    
+    .modal-content {
+        max-width: 80vw;
+        padding: 18px;
+    }
+    
+    .modal-content img {
+        max-height: 180px;
+        object-fit: contain;
+    }
 }
 </style>
 </head>
@@ -127,8 +195,8 @@ button.secondary {
 
 <!-- INTRO -->
 <div class="card" id="step1">
-    <h2>🎉 Bienvenida</h2>
-    <p>Has escaneado el QR correcto.<br>Empieza tu gymkhana 😏</p>
+    <h2>😈 ¡Bienvenida, Claudia!</h2>
+    <p>¿Creías que ibas a tener tu regalo tan fácil? JAJA <br><br>Empieza tu gymkhana 😏</p>
     <button onclick="go(2)">Empezar</button>
 </div>
 
@@ -180,6 +248,16 @@ button.secondary {
     <h2>🔗 Prueba final</h2>
     <p>Solo uno de estos links es el bueno…</p>
     <div class="links" id="links"></div>
+</div>
+
+<!-- Modal para mostrar fotos -->
+<div id="photoModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 id="modalTitle">¿Es este?</h3>
+        <img id="modalImage" src="" alt="Foto">
+        <p id="modalText" style="color: #ff6f91; font-weight: bold;"></p>
+        <button id="closeModalBtn" onclick="closeModal()">Cerrar</button>
+    </div>
 </div>
 
 <!-- VICTORIA -->
@@ -385,14 +463,6 @@ function gameLoop() {
 gameLoop();
 
 /* PRUEBA 5 */
-const fakeLinks = [
-    "https://wikipedia.org",
-    "https://youtube.com",
-    "https://google.com",
-    "https://elpais.com",
-    "https://rtve.es"
-];
-
 const linkTexts = [
     "aqui",
     "link",
@@ -427,11 +497,14 @@ function canPlaceCircle(x, y, radius, existingCircles) {
 
 function getRandomPosition(size) {
     const radius = size / 2;
-    const maxAttempts = 100; // Aumentado de 50 a 100
+    const maxAttempts = 100;
+    const isMobile = window.innerWidth <= 480;
+    const maxWidth = isMobile ? window.innerWidth - 40 : 300;
+    const maxHeight = isMobile ? 360 : 520;
     
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        const x = radius + Math.random() * (300 - size);
-        const y = radius + Math.random() * (520 - size);
+        const x = radius + Math.random() * (maxWidth - size);
+        const y = radius + Math.random() * (maxHeight - size);
         
         if (canPlaceCircle(x, y, radius, circles)) {
             return { x, y };
@@ -441,33 +514,24 @@ function getRandomPosition(size) {
     return null;
 }
 
-for (let i=0;i<15;i++) {
-    const a = document.createElement("a");
-    const size = 40 + Math.random() * 60; // Tamaños entre 40px y 100px
-    const radius = size / 2;
+function closeModal() {
+    photoModal.classList.remove("active");
+}
+
+function showPhoto(index, isCorrect) {
+    const modal = photoModal;
+    const modalTitle = document.getElementById("modalTitle");
+    const modalImage = document.getElementById("modalImage");
+    const modalText = document.getElementById("modalText");
+    const closeBtn = document.getElementById("closeModalBtn");
     
-    let pos = getRandomPosition(size);
-    
-    // Si no encuentra espacio en los intentos normales, reducir tamaño y reintentar
-    if (pos === null) {
-        const smallerSize = 35 + Math.random() * 40;
-        const smallerRadius = smallerSize / 2;
-        pos = getRandomPosition(smallerSize);
-    }
-    
-    if (pos === null) {
-        // Si sigue sin encontrar espacio, colocar en posición forzada
-        pos = { x: 50 + (i * 30), y: 50 + ((i % 5) * 100) };
-    }
-    
-    circles.push({ x: pos.x, y: pos.y, radius: radius });
-    
-    // El link ganador es el que tiene "este"
-    if (i === winner) {
-        a.innerText = "este";
-        a.href = "#";
-        a.onclick = (e) => {
-            e.preventDefault();
+    if (isCorrect) {
+        // Link correcto
+        modalTitle.innerText = "¡GANASTE! 🎉";
+        modalText.innerText = "Este es el correcto";
+        closeBtn.innerText = "Continuar";
+        closeBtn.onclick = () => {
+            photoModal.classList.remove("active");
             // Animación de confeti
             confetti({
                 particleCount: 150,
@@ -495,14 +559,106 @@ for (let i=0;i<15;i++) {
             }, 500);
         };
     } else {
+        // Link incorrecto
+        modalTitle.innerText = "❌ No es este";
+        modalText.innerText = "Intenta con otro";
+        closeBtn.innerText = "Cerrar";
+        closeBtn.onclick = closeModal;
+    }
+    
+    // Cargar imagen de la carpeta links con detección de extensión
+    const imgExtensions = ['jpg', 'JPG', 'jpeg', 'JPEG', 'png', 'PNG'];
+    let found = false;
+    for (let ext of imgExtensions) {
+        const img = new Image();
+        img.onload = () => {
+            modalImage.src = img.src;
+            found = true;
+        };
+        img.onerror = () => {
+            if (!found && ext === imgExtensions[imgExtensions.length - 1]) {
+                modalImage.src = `links/${index}.jpg`;
+            }
+        };
+        img.src = `links/${index}.${ext}`;
+        if (found) break;
+    }
+    
+    modal.classList.add("active");
+}
+
+for (let i=0;i<15;i++) {
+    const a = document.createElement("a");
+    const isMobile = window.innerWidth <= 480;
+    const size = isMobile ? (25 + Math.random() * 35) : (40 + Math.random() * 60); // Bolitas más pequeñas en mobile
+    const radius = size / 2;
+    
+    let pos = getRandomPosition(size);
+    
+    // Si no encuentra espacio en los intentos normales, reducir tamaño y reintentar
+    if (pos === null) {
+        const smallerSize = isMobile ? (20 + Math.random() * 25) : (35 + Math.random() * 40);
+        pos = getRandomPosition(smallerSize);
+    }
+    
+    if (pos === null) {
+        // Si sigue sin encontrar espacio, colocar en posición forzada
+        pos = { x: 30 + (i * 20), y: 30 + ((i % 5) * 70) };
+    }
+    
+    circles.push({ x: pos.x, y: pos.y, radius: radius });
+    
+    // El link ganador es el que tiene "este"
+    if (i === winner) {
+        a.innerText = "este";
+        a.onclick = (e) => {
+            e.preventDefault();
+            // Animación de confeti directa
+            confetti({
+                particleCount: 150,
+                spread: 100,
+                origin: { y: 0.6 }
+            });
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.3 }
+            });
+            // Ir directamente a pantalla de victoria
+            setTimeout(() => {
+                go(7);
+                // Confeti continuo en la pantalla de victoria
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        confetti({
+                            particleCount: 50,
+                            spread: 360,
+                            origin: { x: Math.random(), y: Math.random() * 0.5 }
+                        });
+                    }, i * 300);
+                }
+            }, 500);
+        };
+    } else {
         // Seleccionar una palabra aleatoria que no sea "este"
         let randomText;
         do {
             randomText = linkTexts[Math.floor(Math.random() * linkTexts.length)];
         } while (randomText === "este");
         
+        // Calcular índice de imagen saltando el winner
+        let imageIndex = i;
+        if (i > winner) {
+            imageIndex = i; // Número del botón como índice
+        } else {
+            imageIndex = i + 1; // Saltar el índice del winner
+        }
+        
         a.innerText = randomText;
-        a.href = fakeLinks[Math.floor(Math.random()*fakeLinks.length)];
+        a.onclick = (e) => {
+            e.preventDefault();
+            showPhoto(imageIndex, false);
+        };
     }
     
     a.style.width = size + "px";
@@ -510,7 +666,7 @@ for (let i=0;i<15;i++) {
     a.style.fontSize = Math.max(8, size / 5) + "px";
     a.style.top = (pos.y - radius) + "px";
     a.style.left = (pos.x - radius) + "px";
-    a.target = "_blank";
+    a.href = "#";
     linksDiv.appendChild(a);
 }
 </script>
